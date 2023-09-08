@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  labels:
+    app: client
+spec:
+  selector: 
+    matchLabels:
+      app: client
+  replicas: 1 
+  template:
+    metadata:
+      labels: 
+        app: client
+    spec:
+      containers:
+      - image: michaelbraunbass/vulnadoclient:main
+        imagePullPolicy: Always
+        name: client
+        ports:
+        - containerPort: 1337
+        securityContext:
+           allowPrivilegeEscalation: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vulnadoclientservice
+  labels:
+    app: client
+spec:
+  ports:
+   - port: 1337
+     targetPort: 80
+  selector:
+    app: client
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vulnado-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: vulnado
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vulnadoclientservice
+            port:
+              number: 1337

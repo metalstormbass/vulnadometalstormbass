@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: internal
+  labels:
+    app: internal
+spec:
+  selector: 
+    matchLabels:
+      app: internal
+  replicas: 1 
+  template:
+    metadata:
+      labels: 
+        app: internal
+    spec:
+      containers:
+      - image: michaelbraunbass/vulnadointernal:main
+        imagePullPolicy: Always
+        name: client
+        ports:
+        - containerPort: 80
+        securityContext:
+           allowPrivilegeEscalation: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vulnadointernalservice
+  labels:
+    app: internal
+spec:
+  ports:
+   - port: 80
+     targetPort: 80
+  selector:
+    app: internal
+  type: ClusterIP

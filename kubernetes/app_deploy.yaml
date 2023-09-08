@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vulnado
+  labels:
+    app: vulnado
+spec:
+  selector: 
+    matchLabels:
+      app: vulnado
+  replicas: 1 
+  template:
+    metadata:
+      labels: 
+        app: vulnado
+    spec:
+      containers:
+      - image: michaelbraunbass/vulnado:main
+        imagePullPolicy: Always
+        name: vulnado
+        ports:
+        - containerPort: 8080
+        securityContext:
+           allowPrivilegeEscalation: true
+        env:
+           - name: PGPASSWORD
+             value: "vulnado"           
+           - name: PGDATABASE
+             value: "vulnado"
+           - name: "PGHOST"
+             value: "db:5432"
+           - name: "PGUSER"
+             value: "postgres"  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vulnadoservice
+  labels:
+    app: vulnado
+spec:
+  ports:
+   - port: 8080
+     targetPort: 8080
+  selector:
+    app: vulnado
+  type: ClusterIP
